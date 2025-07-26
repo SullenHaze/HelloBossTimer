@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hello's Masarta Eerie Boss Spawn Timers</title>
+  <style>
+    :root {
+      --bg-color: #f9f9f9;
+      --text-color: #222;
+      --timer-bg: #fff;
+      --input-bg: #fff;
+      --input-color: #222;
+      --header-bg: #e3f2fd;
+      --border-color: #ddd;
+      --primary: #f32121;
+      --success: #4caf50;
+      --warning: #ff9800;
+      --danger: #f44336;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: var(--header-bg);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+    }
+
+    h1 {
+      margin: 0;
+      color: #1565c0;
+      font-size: 2.5rem;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #555;
+      margin-top: 10px;
+    }
+
+    .timer-group {
+      background: var(--timer-bg);
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 25px;
+      border: 1px solid var(--border-color);
+    }
+
+    h2 {
+      margin-top: 0;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 10px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    h2 span.icon {
+      font-size: 1.5rem;
+    }
+
+    .timer {
+      margin: 15px 0;
+      background: var(--timer-bg);
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      position: relative;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 1px solid var(--border-color);
+    }
+
+    .timer:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .timer label {
+      flex: 1 1 150px;
+      font-weight: bold;
+      font-size: 1.1rem;
+      user-select: none;
+      color: #00d9ff;
+    }
+
+    .inputs {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    input[type="number"] {
+      width: 65px;
+      padding: 8px 10px;
+      font-size: 1.1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      text-align: center;
+      background: var(--input-bg);
+      color: var(--input-color);
+      transition: background-color 0.3s ease, color 0.3s ease;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    input[type="number"]:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+    }
+
+    input[type="number"][readonly] {
+      background: #f5f5f5;
+      color: #666;
+      cursor: not-allowed;
+    }
+
+    button {
+      padding: 8px 15px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      font-weight: 600;
+    }
+
+    button:disabled {
+      background-color: #e0e0e0;
+      cursor: not-allowed;
+      color: #9e9e9e;
+      opacity: 0.7;
+    }
+
+    button.start {
+      background-color: var(--success);
+      color: white;
+    }
+
+    button.start:hover:not(:disabled) {
+      background-color: #388e3c;
+      box-shadow: 0 2px 6px rgba(76, 175, 80, 0.4);
+    }
+
+    button.reset {
+      background-color: var(--danger);
+      color: white;
+    }
+
+    button.reset:hover:not(:disabled) {
+      background-color: #d32f2f;
+      box-shadow: 0 2px 6px rgba(244, 67, 54, 0.4);
+    }
+
+    button.pause {
+      background-color: var(--warning);
+      color: #212529;
+    }
+
+    button.pause:hover:not(:disabled) {
+      background-color: #f57c00;
+      box-shadow: 0 2px 6px rgba(255, 152, 0, 0.4);
+    }
+
+    .time-display {
+      font-weight: bold;
+      font-size: 1.3rem;
+      width: 110px;
+      text-align: center;
+      flex: 0 0 auto;
+      user-select: none;
+      font-family: 'Courier New', monospace;
+      background: #f8f9fa;
+      padding: 8px 15px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+    }
+
+    .progress-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 6px;
+      background: var(--success);
+      border-radius: 0 0 0 7px;
+      transition: width 1s linear, background-color 0.5s ease;
+      width: 0%;
+    }
+
+    .control-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .control-panel {
+      background: var(--timer-bg);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .control-panel h3 {
+      margin-top: 0;
+      color: var(--primary);
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+    }
+
+    .global-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .global-controls button {
+      flex: 1;
+      min-width: 120px;
+      padding: 12px 0;
+    }
+
+    .volume-control {
+      margin-top: 20px;
+    }
+
+    .volume-control label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: bold;
+      user-select: none;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .volume-level {
+      font-weight: normal;
+      color: #666;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+      height: 8px;
+      border-radius: 4px;
+      background: #e0e0e0;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 15px;
+      background: var(--timer-bg);
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-color);
+    }
+
+    .sort-controls, .theme-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    label.sort-label {
+      font-weight: bold;
+      user-select: none;
+    }
+
+    select#sortOption {
+      font-size: 1rem;
+      padding: 8px 15px;
+      border-radius: 5px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      background: var(--input-bg);
+      color: var(--text-color);
+    }
+
+    button#toggleThemeBtn {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s ease;
+    }
+
+    button#toggleThemeBtn:hover {
+      background: #0d47a1;
+    }
+
+    .import-export-controls {
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button.import-export-btn {
+      padding: 12px 25px;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      user-select: none;
+      background: #9c27b0;
+      color: white;
+      transition: background-color 0.2s ease;
+    }
+
+    button.import-export-btn:hover {
+      background: #7b1fa2;
+    }
+
+    input#importInput {
+      display: none;
+    }
+
+    #main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    #left-column,
+    #right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+    }
+
+    .instructions {
+      background: #e8f5e9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border-left: 4px solid var(--success);
+    }
+
+    .instructions h3 {
+      margin-top: 0;
+      color: #2e7d32;
+    }
+
+    .instructions ul {
+      padding-left: 20px;
+    }
+
+    .instructions li {
+      margin-bottom: 10px;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: #666;
+      font-size: 1.2rem;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Dark Mode Variables */
+    body.dark {
+      --bg-color: #121212;
+      --text-color: #e0e0e0;
+      --timer-bg: #1e1e1e;
+      --input-bg: #2e2e2e;
+      --input-color: #e0e0e0;
+      --border-color: #333;
+      --header-bg: #0d1b2a;
+    }
+
+    body.dark .instructions {
+      background: #1b5e20;
+      color: #e8f5e9;
+    }
+
+    body.dark .time-display {
+      background: #2a2a2a;
+      border-color: #333;
+    }
+
+    /* Responsive design */
+    @media (max-width: 900px) {
+      #main-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .control-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .timer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+      }
+      
+      .inputs {
+        width: 100%;
+        justify-content: flex-end;
+      }
+      
+      .top-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+    <div class="top-bar" aria-label="Sorting and theme controls">
+      <div class="sort-controls">
+        <label for="sortOption" class="sort-label">Sort Timers By:</label>
+        <select id="sortOption" aria-controls="timersList" aria-label="Timer sorting options">
+          <option value="remaining">Remaining Time (descending)</option>
+          <option value="name">Name (ascending)</option>
+          <option value="category">Category</option>
+        </select>
+      </div>
+      
+      <div class="theme-controls">
+        <button id="toggleThemeBtn" aria-pressed="false">
+          <span>🌙</span> Switch to Dark Mode
+        </button>
+      </div>
+    </div>
+
+    <div class="control-section">
+      <div class="control-panel">
+        <h3>Global Controls</h3>
+        <div class="global-controls" aria-label="Global timer controls">
+          <button id="startAllBtn" class="start">Start All</button>
+          <button id="pauseAllBtn" class="pause" disabled>Pause All</button>
+          <button id="resetAllBtn" class="reset" disabled>Reset All</button>
+        </div>
+        
+        <div class="volume-control" aria-label="Alarm volume control">
+          <label>
+            Alarm Volume
+            <span class="volume-level" id="volumeLevel">100%</span>
+          </label>
+          <input type="range" id="volumeRange" min="0" max="1" step="0.01" value="1" />
+        </div>
+      </div>
+
+      
+      <div class="control-panel">
+        <h3>Import/Export</h3>
+        <div class="import-export-controls" aria-label="Import and export timer sets">
+          <button id="exportBtn" class="import-export-btn" aria-label="Export timers to JSON file">Export Timers</button>
+          <button id="importBtn" class="import-export-btn" aria-label="Import timers from JSON file">Import Timers</button>
+          <input type="file" id="importInput" accept="application/json" aria-hidden="true" />
+        </div>
+        <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+          Save your timer configurations and load them later
+        </p>
+      </div>
+    </div>
+
+    <main id="timersList" role="main">
+      <div id="main-grid">
+        <div id="left-column">
+          <div class="timer-group" id="masarta-eerie" aria-label="Masarta Eerie timers" data-category="Masarta Eerie" role="region">
+            <h2><span class="icon">👑</span> Masarta Eerie</h2>
+
+            <div class="timer" data-name="STORMID OF ONRUSH" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>STORMID OF ONRUSH</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="HAKIR" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>HAKIR</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="DAMIROSS" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>DAMIROSS</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="KAFKA" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>KAFKA</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="AWAKENED PANDERRE" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>AWAKENED PANDERRE</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="MELVILLE" role="region" aria-live="polite" aria-atomic="true" data-category="Masarta Eerie">
+              <label>MELVILLE</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="timer-group" id="battlefield" aria-label="Battlefield timers" data-category="Battlefield" role="region">
+            <h2><span class="icon">⚔️</span> Battlefield</h2>
+
+            <div class="timer" data-name="RUINED KNIGHT" role="region" aria-live="polite" aria-atomic="true" data-category="Battlefield">
+              <label>RUINED KNIGHT</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="TANDALLON" role="region" aria-live="polite" aria-atomic="true" data-category="Battlefield">
+              <label>TANDALLON</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="right-column">
+          <div class="timer-group" id="ice-cave" aria-label="Ice Cave timers" data-category="Ice Cave" role="region">
+            <h2><span class="icon">❄️</span> Ice Cave</h2>
+
+            <div class="timer" data-name="HOTURA" role="region" aria-live="polite" aria-atomic="true" data-category="Ice Cave">
+              <label>HOTURA</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="FRENZIED TIGDAL" role="region" aria-live="polite" aria-atomic="true" data-category="Ice Cave">
+              <label>FRENZIED TIGDAL</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="CORRUPTED GATPHILLIAN" role="region" aria-live="polite" aria-atomic="true" data-category="Ice Cave">
+              <label>CORRUPTED GATPHILLIAN</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startTimer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+          </div>
+
+          <div class="timer-group" id="pm11-boss" aria-label="11 PM Boss timers" data-category="11 PM BOSS" role="region">
+            <h2><span class="icon">🌙</span> 11 PM BOSS</h2>
+            <div style="margin: 15px 0; padding: 12px; background: #fff3cd; border-left: 5px solid #ffeb3b; border-radius: 6px; color: #333;">
+  <strong>⏰ Next UTC+8 Boss Spawn (11:00 PM):</strong>
+  <span id="utc8Countdown" style="margin-left: 10px; font-weight: bold;">Loading...</span>
+  <div style="margin-top: 10px;">
+    <button id="startUTC55" class="start" style="margin-right: 10px;">⏱ Start 10:55 PM Timer</button>
+    <button id="resetUTC55" class="reset">🔁 Reset DUCAS & DERGIO</button>
+  </div>
+</div>
+
+
+            <div class="timer" data-name="DUCAS" role="region" aria-live="polite" aria-atomic="true" data-category="11 PM BOSS">
+              <label>DUCAS</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startPM11Timer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+
+            <div class="timer" data-name="DERGIO" role="region" aria-live="polite" aria-atomic="true" data-category="11 PM BOSS">
+              <label>DERGIO</label>
+              <div class="inputs">
+                <input type="number" min="0" placeholder="hr" class="hours" aria-label="Hours until spawn" />
+                <span>:</span>
+                <input type="number" min="0" max="59" placeholder="min" class="minutes" aria-label="Minutes until spawn" />
+                <button class="start" onclick="startPM11Timer(this)">Start</button>
+                <button class="pause" onclick="pauseTimer(this)" disabled>Pause</button>
+                <button class="reset" onclick="resetTimer(this)" disabled>Reset</button>
+              </div>
+              <span class="time-display" aria-live="off">00:00</span>
+              <div class="progress-bar"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>SullenHaze Timer Tool v00.002 | Donate crows to SullenHazeシ : 0xb9637367a01bbd0aa8b2684ba77019d57d64bd6d</p>
+    </footer>
+  </div>
+
+  <audio id="alarmSound" preload="auto">
+    <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+  </audio>
+
+  <script>
+    const timers = new Map();
+    const alarmSound = document.getElementById('alarmSound');
+    const volumeRange = document.getElementById('volumeRange');
+    const volumeLevel = document.getElementById('volumeLevel');
+    const startAllBtn = document.getElementById('startAllBtn');
+    const pauseAllBtn = document.getElementById('pauseAllBtn');
+    const resetAllBtn = document.getElementById('resetAllBtn');
+    const sortOption = document.getElementById('sortOption');
+    const toggleThemeBtn = document.getElementById('toggleThemeBtn');
+    const exportBtn = document.getElementById('exportBtn');
+    const importBtn = document.getElementById('importBtn');
+    const importInput = document.getElementById('importInput');
+    const timersList = document.getElementById('timersList');
+
+
+    function updateUTC8Countdown() {
+  const now = new Date();
+
+  let target = new Date(now);
+  target.setHours(23, 0, 0, 0); // Today 11:00 PM
+
+  // If it's past 11:00 PM now, go to tomorrow
+  if (now.getTime() >= target.getTime()) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  const diff = target - now;
+
+  const totalSeconds = Math.floor(diff / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  const pad = n => n.toString().padStart(2, '0');
+  const timeText = `${pad(h)}:${pad(m)}:${pad(s)} until ${formatAMPM(target)}`;
+
+  const countdownEl = document.getElementById("utc8Countdown");
+  if (countdownEl) {
+    countdownEl.textContent = timeText;
+  }
+}
+
+function formatAMPM(date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+}
+
+
+function formatAMPM(date) {
+  let hours = date.getHours();
+  let minutes = date.getMinutes();
+  let seconds = date.getSeconds();
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+}
+
+
+    // Request Notification permission on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+      
+      // Initialize volume display
+      volumeLevel.textContent = "100%";
+    });
+
+    // Validate time inputs
+    function validateInputs(hours, minutes) {
+      if (hours < 0 || minutes < 0 || minutes > 59) return false;
+      if (hours === 0 && minutes === 0) return false;
+      return true;
+    }
+
+    // Standard timers start
+    function startTimer(button) {
+      const timerDiv = button.closest('.timer');
+      const name = timerDiv.getAttribute('data-name');
+      const hoursInput = timerDiv.querySelector('.hours');
+      const minutesInput = timerDiv.querySelector('.minutes');
+      const display = timerDiv.querySelector('.time-display');
+      const resetBtn = timerDiv.querySelector('button.reset');
+      const pauseBtn = timerDiv.querySelector('button.pause');
+      const startBtn = button;
+      const progressBar = timerDiv.querySelector('.progress-bar');
+
+      let hours = parseInt(hoursInput.value, 10) || 0;
+      let minutes = parseInt(minutesInput.value, 10) || 0;
+
+      if (!validateInputs(hours, minutes)) {
+        alert(`Please enter a valid time for "${name}" (hours ≥ 0, 0 ≤ minutes ≤ 59, and not both zero).`);
+        return;
+      }
+
+      if (minutes > 59) {
+        minutes = 59;
+        minutesInput.value = 59;
+      }
+
+      let totalSeconds = hours * 3600 + minutes * 60;
+
+      if (timers.has(name)) {
+        clearInterval(timers.get(name).intervalId);
+      }
+
+      hoursInput.disabled = true;
+      minutesInput.disabled = true;
+      startBtn.disabled = true;
+      resetBtn.disabled = false;
+      pauseBtn.disabled = false;
+      pauseBtn.textContent = 'Pause';
+
+      updateDisplay(display, totalSeconds);
+      updateProgress(progressBar, 1, totalSeconds, totalSeconds);
+
+      const startTime = Date.now();
+      const endTime = startTime + totalSeconds * 1000;
+
+      const timerData = {
+        intervalId: null,
+        timerDiv,
+        hoursInput,
+        minutesInput,
+        startBtn,
+        resetBtn,
+        pauseBtn,
+        totalSeconds,
+        paused: false,
+        progressBar,
+        endTime,
+        remaining: totalSeconds
+      };
+
+      timerData.intervalId = setInterval(() => {
+        if (timerData.paused) return;
+
+        const now = Date.now();
+        let remaining = Math.round((timerData.endTime - now) / 1000);
+
+        if (remaining < 0) remaining = 0;
+
+        timerData.remaining = remaining;
+
+        updateDisplay(display, remaining);
+        updateProgress(progressBar, remaining / totalSeconds, totalSeconds, remaining);
+
+        if (remaining <= 0) {
+          clearInterval(timerData.intervalId);
+          timers.delete(name);
+          hoursInput.disabled = false;
+          minutesInput.disabled = false;
+          startBtn.disabled = false;
+          resetBtn.disabled = true;
+          pauseBtn.disabled = true;
+          display.textContent = "00:00";
+          updateProgress(progressBar, 0, totalSeconds, 0);
+
+          triggerAlarm(name);
+          updateGlobalButtons();
+          sortTimers();
+        }
+      }, 1000);
+
+      timers.set(name, timerData);
+
+      updateGlobalButtons();
+      sortTimers();
+    }
+
+    // Start 11 PM Boss timer (automatic countdown to 10:55 PM daily)
+    function startPM11Timer(button) {
+      const timerDiv = button.closest('.timer');
+      const name = timerDiv.getAttribute('data-name');
+      const hoursInput = timerDiv.querySelector('.hours');
+      const minutesInput = timerDiv.querySelector('.minutes');
+      const display = timerDiv.querySelector('.time-display');
+      const resetBtn = timerDiv.querySelector('button.reset');
+      const pauseBtn = timerDiv.querySelector('button.pause');
+      const startBtn = button;
+      const progressBar = timerDiv.querySelector('.progress-bar');
+
+      const now = new Date();
+      let target = new Date(now);
+      target.setHours(22, 55, 0, 0); // 10:55 PM today
+
+      if (now >= target) {
+        target.setDate(target.getDate() + 1);
+      }
+
+      let diffSeconds = Math.round((target - now) / 1000);
+
+      if (timers.has(name)) {
+        clearInterval(timers.get(name).intervalId);
+      }
+
+      // Fill in the read-only inputs to reflect countdown
+      const hours = Math.floor(diffSeconds / 3600);
+      const minutes = Math.floor((diffSeconds % 3600) / 60);
+      hoursInput.value = hours;
+      minutesInput.value = minutes;
+
+      hoursInput.disabled = true;
+      minutesInput.disabled = true;
+      startBtn.disabled = true;
+      resetBtn.disabled = false;
+      pauseBtn.disabled = false;
+      pauseBtn.textContent = 'Pause';
+
+      updateDisplay(display, diffSeconds);
+      updateProgress(progressBar, 1, diffSeconds, diffSeconds);
+
+      const endTime = Date.now() + diffSeconds * 1000;
+
+      const timerData = {
+        intervalId: null,
+        timerDiv,
+        hoursInput,
+        minutesInput,
+        startBtn,
+        resetBtn,
+        pauseBtn,
+        totalSeconds: diffSeconds,
+        paused: false,
+        progressBar,
+        endTime,
+        remaining: diffSeconds
+      };
+
+      timerData.intervalId = setInterval(() => {
+        if (timerData.paused) return;
+
+        const nowMs = Date.now();
+        let remaining = Math.round((timerData.endTime - nowMs) / 1000);
+        if (remaining < 0) remaining = 0;
+
+        timerData.remaining = remaining;
+
+        updateDisplay(display, remaining);
+        updateProgress(progressBar, remaining / diffSeconds, diffSeconds, remaining);
+
+        if (remaining <= 0) {
+          clearInterval(timerData.intervalId);
+          timers.delete(name);
+          hoursInput.disabled = false;
+          minutesInput.disabled = false;
+          startBtn.disabled = false;
+          resetBtn.disabled = true;
+          pauseBtn.disabled = true;
+          display.textContent = "00:00";
+          updateProgress(progressBar, 0, diffSeconds, 0);
+
+          triggerAlarm(name);
+          updateGlobalButtons();
+          sortTimers();
+        }
+      }, 1000);
+
+      timers.set(name, timerData);
+
+      updateGlobalButtons();
+      sortTimers();
+    }
+
+    // Pause timer function
+    function pauseTimer(button) {
+      const timerDiv = button.closest('.timer');
+      const name = timerDiv.getAttribute('data-name');
+      if (!timers.has(name)) return;
+
+      const timer = timers.get(name);
+      if (timer.paused) {
+        const now = Date.now();
+        timer.endTime = now + timer.remaining * 1000;
+        timer.paused = false;
+        button.textContent = 'Pause';
+      } else {
+        const now = Date.now();
+        timer.remaining = Math.round((timer.endTime - now) / 1000);
+        timer.paused = true;
+        button.textContent = 'Resume';
+      }
+      updateGlobalButtons();
+    }
+
+    // Reset timer function
+    function resetTimer(button) {
+      const timerDiv = button.closest('.timer');
+      const name = timerDiv.getAttribute('data-name');
+      if (timers.has(name)) {
+        clearInterval(timers.get(name).intervalId);
+        timers.delete(name);
+      }
+
+      const hoursInput = timerDiv.querySelector('.hours');
+      const minutesInput = timerDiv.querySelector('.minutes');
+      const display = timerDiv.querySelector('.time-display');
+      const startBtn = timerDiv.querySelector('button.start');
+      const resetBtn = button;
+      const pauseBtn = timerDiv.querySelector('button.pause');
+      const progressBar = timerDiv.querySelector('.progress-bar');
+
+      display.textContent = '00:00';
+      hoursInput.value = '';
+      minutesInput.value = '';
+      hoursInput.disabled = false;
+      minutesInput.disabled = false;
+      startBtn.disabled = false;
+      resetBtn.disabled = true;
+      pauseBtn.disabled = true;
+      pauseBtn.textContent = 'Pause';
+      updateProgress(progressBar, 0, 0, 0);
+
+      stopAlarm();
+      updateGlobalButtons();
+      sortTimers();
+    }
+
+    // Display formatter
+    function updateDisplay(display, seconds) {
+      if (seconds < 0) seconds = 0;
+      const hrs = Math.floor(seconds / 3600);
+      const mins = Math.floor((seconds % 3600) / 60);
+      const secs = seconds % 60;
+      if (hrs > 0) {
+        display.textContent = `${hrs.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+      } else {
+        display.textContent = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+      }
+    }
+
+    // Update progress bar width and color
+    function updateProgress(bar, fraction, totalSeconds, remainingSeconds) {
+      bar.style.width = `${(fraction * 100).toFixed(2)}%`;
+
+      if (remainingSeconds !== undefined && totalSeconds !== undefined && totalSeconds > 0) {
+        let threshold = Math.max(totalSeconds * 0.1, 30);
+        if (remainingSeconds <= threshold) {
+          bar.style.background = '#f44336'; // red
+        } else {
+          bar.style.background = '#4caf50'; // green
+        }
+      } else {
+        bar.style.background = '#4caf50';
+      }
+    }
+
+    // Fixed sorting function
+    function sortTimers() {
+      const option = sortOption.value;
+      const timerGroups = Array.from(document.querySelectorAll('.timer-group'));
+
+      // Remove all timers from groups temporarily
+      const allTimers = [];
+      timerGroups.forEach(group => {
+        const timersInGroup = Array.from(group.querySelectorAll('.timer'));
+        timersInGroup.forEach(t => {
+          group.removeChild(t);
+          allTimers.push(t);
+        });
+      });
+
+      if (option === "remaining") {
+        allTimers.sort((a, b) => {
+          const nameA = a.getAttribute('data-name');
+          const nameB = b.getAttribute('data-name');
+          const timerA = timers.get(nameA);
+          const timerB = timers.get(nameB);
+          const timeA = timerA ? (timerA.paused ? timerA.remaining : Math.round((timerA.endTime - Date.now()) / 1000)) : 0;
+          const timeB = timerB ? (timerB.paused ? timerB.remaining : Math.round((timerB.endTime - Date.now()) / 1000)) : 0;
+          return timeB - timeA; // Descending order
+        });
+      } else if (option === "name") {
+        allTimers.sort((a, b) => {
+          const nameA = a.getAttribute('data-name').toUpperCase();
+          const nameB = b.getAttribute('data-name').toUpperCase();
+          return nameA.localeCompare(nameB);
+        });
+      } else if (option === "category") {
+        // Fixed category sorting logic
+        allTimers.sort((a, b) => {
+          const catA = a.getAttribute('data-category') || '';
+          const catB = b.getAttribute('data-category') || '';
+          if (catA === catB) {
+            return a.getAttribute('data-name').localeCompare(b.getAttribute('data-name'));
+          }
+          return catA.localeCompare(catB);
+        });
+      }
+
+      // Create mapping of groups by data-category
+      const groupsMap = {};
+      timerGroups.forEach(group => {
+        const category = group.getAttribute('data-category');
+        if (category) {
+          groupsMap[category] = group;
+        }
+      });
+
+      // Append timers to their respective groups
+      allTimers.forEach(timerEl => {
+        const cat = timerEl.getAttribute('data-category');
+        if (cat && groupsMap[cat]) {
+          groupsMap[cat].appendChild(timerEl);
+        } else {
+          // Fallback to first group if category not found
+          if (timerGroups.length > 0) {
+            timerGroups[0].appendChild(timerEl);
+          }
+        }
+      });
+    }
+
+    // Alarm with notification
+    async function triggerAlarm(name) {
+      if (document.hidden) {
+        try {
+          window.focus();
+        } catch {}
+      }
+
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("Timer Finished", {
+          body: `⏰ Timer "${name}" is up!`,
+          icon: "https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg",
+          silent: false
+        });
+      }
+
+      alarmSound.loop = true;
+      try {
+        await alarmSound.play();
+      } catch (error) {
+        console.log("Audio play error:", error);
+      }
+
+      await showModalAlert(`⏰ Timer "${name}" is up!`);
+
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+    }
+
+    // Modal alert
+    function showModalAlert(message) {
+      return new Promise((resolve) => {
+        const modalOverlay = document.createElement('div');
+        modalOverlay.style.position = 'fixed';
+        modalOverlay.style.top = 0;
+        modalOverlay.style.left = 0;
+        modalOverlay.style.width = '100vw';
+        modalOverlay.style.height = '100vh';
+        modalOverlay.style.backgroundColor = 'rgba(0,0,0,0.6)';
+        modalOverlay.style.display = 'flex';
+        modalOverlay.style.justifyContent = 'center';
+        modalOverlay.style.alignItems = 'center';
+        modalOverlay.style.zIndex = 10000;
+
+        const modalBox = document.createElement('div');
+        modalBox.style.backgroundColor = 'var(--timer-bg, #fff)';
+        modalBox.style.color = 'var(--text-color, #222)';
+        modalBox.style.padding = '25px 35px';
+        modalBox.style.borderRadius = '12px';
+        modalBox.style.boxShadow = '0 0 20px rgba(0,0,0,0.4)';
+        modalBox.style.maxWidth = '450px';
+        modalBox.style.textAlign = 'center';
+        modalBox.style.fontSize = '1.3rem';
+
+        const msg = document.createElement('p');
+        msg.textContent = message;
+        msg.style.marginBottom = '25px';
+        msg.style.fontWeight = 'bold';
+
+        const okBtn = document.createElement('button');
+        okBtn.textContent = 'OK';
+        okBtn.style.padding = '12px 30px';
+        okBtn.style.fontSize = '1.1rem';
+        okBtn.style.backgroundColor = '#2196f3';
+        okBtn.style.color = '#fff';
+        okBtn.style.border = 'none';
+        okBtn.style.borderRadius = '6px';
+        okBtn.style.cursor = 'pointer';
+        okBtn.style.userSelect = 'none';
+        okBtn.style.fontWeight = 'bold';
+
+        okBtn.addEventListener('click', () => {
+          document.body.removeChild(modalOverlay);
+          resolve();
+        });
+
+        modalBox.appendChild(msg);
+        modalBox.appendChild(okBtn);
+        modalOverlay.appendChild(modalBox);
+        document.body.appendChild(modalOverlay);
+      });
+    }
+
+    function stopAlarm() {
+      alarmSound.pause();
+      alarmSound.currentTime = 0;
+    }
+
+    function updateGlobalButtons() {
+      const anyRunning = Array.from(timers.values()).some(timer => !timer.paused);
+      const anyPaused = Array.from(timers.values()).some(timer => timer.paused);
+      const anyTimers = timers.size > 0;
+
+      startAllBtn.disabled = anyRunning;
+      pauseAllBtn.disabled = !anyRunning && !anyPaused;
+      resetAllBtn.disabled = !anyTimers;
+      
+      // Update button text based on state
+      if (anyPaused && !anyRunning) {
+        pauseAllBtn.textContent = 'Resume All';
+      } else {
+        pauseAllBtn.textContent = 'Pause All';
+      }
+    }
+
+    // Global controls handlers
+    startAllBtn.addEventListener('click', () => {
+      document.querySelectorAll('.timer').forEach(timerDiv => {
+        const startBtn = timerDiv.querySelector('button.start');
+        if (!startBtn.disabled) {
+          const timerType = timerDiv.closest('.timer-group').id;
+          if (timerType === 'pm11-boss') {
+            startPM11Timer(startBtn);
+          } else {
+            startTimer(startBtn);
+          }
+        }
+      });
+    });
+    document.getElementById('startUTC55').addEventListener('click', () => {
+  ['DUCAS', 'DERGIO'].forEach(name => {
+    const timerDiv = [...document.querySelectorAll('.timer')].find(t => t.getAttribute('data-name') === name);
+    if (!timerDiv) return;
+    const startBtn = timerDiv.querySelector('button.start');
+    startPM11Timer(startBtn);
+  });
+});
+
+document.getElementById('resetUTC55').addEventListener('click', () => {
+  ['DUCAS', 'DERGIO'].forEach(name => {
+    const timerDiv = [...document.querySelectorAll('.timer')].find(t => t.getAttribute('data-name') === name);
+    if (!timerDiv) return;
+    const resetBtn = timerDiv.querySelector('button.reset');
+    resetBtn.click();
+  });
+});
+
+
+    pauseAllBtn.addEventListener('click', () => {
+      timers.forEach(timer => {
+        if (!timer.paused) {
+          timer.pauseBtn.click();
+        } else if (timer.paused) {
+          timer.pauseBtn.click();
+        }
+      });
+      updateGlobalButtons();
+    });
+
+    resetAllBtn.addEventListener('click', () => {
+      document.querySelectorAll('.timer').forEach(timerDiv => {
+        const resetBtn = timerDiv.querySelector('button.reset');
+        if (!resetBtn.disabled) {
+          resetBtn.click();
+        }
+      });
+    });
+
+    // Sorting event
+    sortOption.addEventListener('change', () => {
+      sortTimers();
+    });
+
+    // Dark mode toggle
+    toggleThemeBtn.addEventListener('click', () => {
+      const body = document.body;
+      if (body.classList.contains('dark')) {
+        body.classList.remove('dark');
+        toggleThemeBtn.innerHTML = '<span>🌙</span> Switch to Dark Mode';
+        toggleThemeBtn.setAttribute('aria-pressed', 'false');
+      } else {
+        body.classList.add('dark');
+        toggleThemeBtn.innerHTML = '<span>☀️</span> Switch to Light Mode';
+        toggleThemeBtn.setAttribute('aria-pressed', 'true');
+      }
+    });
+
+    // Export timers to JSON
+    exportBtn.addEventListener('click', () => {
+      const data = [];
+      timers.forEach((timer, name) => {
+        const now = Date.now();
+        const remaining = timer.paused ? timer.remaining : Math.round((timer.endTime - now) / 1000);
+        if (remaining > 0) {
+          data.push({ 
+            name, 
+            remaining, 
+            category: timer.timerDiv.getAttribute('data-category') 
+          });
+        }
+      });
+      
+      if (data.length === 0) {
+        alert("No active timers to export.");
+        return;
+      }
+      
+      const json = JSON.stringify(data, null, 2);
+      const blob = new Blob([json], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'bossTimers.json';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+
+    // Import timers from JSON file
+    importBtn.addEventListener('click', () => importInput.click());
+
+    importInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!Array.isArray(data)) throw new Error("Invalid file format.");
+          // Reset all timers first
+          document.querySelectorAll('.timer button.reset:not(:disabled)').forEach(btn => btn.click());
+
+          data.forEach(({ name, remaining }) => {
+            if (typeof name !== 'string' || typeof remaining !== 'number') return;
+            const timerDiv = [...document.querySelectorAll('.timer')].find(t => t.getAttribute('data-name') === name);
+            if (!timerDiv) return;
+            const hoursInput = timerDiv.querySelector('.hours');
+            const minutesInput = timerDiv.querySelector('.minutes');
+            const startBtn = timerDiv.querySelector('button.start');
+
+            const hrs = Math.floor(remaining / 3600);
+            const mins = Math.floor((remaining % 3600) / 60);
+            hoursInput.value = hrs;
+            minutesInput.value = mins;
+            
+            const timerType = timerDiv.closest('.timer-group').id;
+            if (timerType === 'pm11-boss') {
+              startPM11Timer(startBtn);
+            } else {
+              startTimer(startBtn);
+            }
+          });
+          alert(`Successfully imported ${data.length} timers.`);
+        } catch (error) {
+          alert("Error importing timers: " + error.message);
+        }
+        importInput.value = '';
+      };
+      reader.readAsText(file);
+    });
+
+    // Persist timers in localStorage
+    function saveTimers() {
+      const data = [];
+      timers.forEach((timer, name) => {
+        const now = Date.now();
+        const remaining = timer.paused ? timer.remaining : Math.round((timer.endTime - now) / 1000);
+        if (remaining > 0) {
+          data.push({ name, remaining });
+        }
+      });
+      localStorage.setItem('bossTimers', JSON.stringify(data));
+    }
+
+    function loadTimers() {
+      const data = JSON.parse(localStorage.getItem('bossTimers') || '[]');
+      data.forEach(({ name, remaining }) => {
+        const timerDiv = [...document.querySelectorAll('.timer')].find(t => t.getAttribute('data-name') === name);
+        if (!timerDiv) return;
+        const hoursInput = timerDiv.querySelector('.hours');
+        const minutesInput = timerDiv.querySelector('.minutes');
+        const startBtn = timerDiv.querySelector('button.start');
+
+        const hrs = Math.floor(remaining / 3600);
+        const mins = Math.floor((remaining % 3600) / 60);
+
+        hoursInput.value = hrs;
+        minutesInput.value = mins;
+        
+        const timerType = timerDiv.closest('.timer-group').id;
+        if (timerType === 'pm11-boss') {
+          startPM11Timer(startBtn);
+        } else {
+          startTimer(startBtn);
+        }
+      });
+    }
+
+    window.addEventListener('load', () => {
+      setInterval(updateUTC8Countdown, 1000);
+      alarmSound.volume = volumeRange.value;
+      loadTimers();
+      sortTimers();
+      updateUTC8Countdown();
+    });
+  </script>
+</body>
+</html>
